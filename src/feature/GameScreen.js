@@ -75,42 +75,9 @@ const GameScreen = () => {
     particleSystem.maxEmitPower = 3;
     particleSystem.updateSpeed = 0.01;
     // Tạo quả cầu và hiệu ứng cho nó
-    function createSphere() {
-      const sphere = BABYLON.MeshBuilder.CreateSphere(
-        "sphere",
-        { diameter: 2 },
-        scene
-      );
-
-      sphere.position = new BABYLON.Vector3(Math.random() * 20 - 5, -10, 5);
-      sphere.material = new BABYLON.StandardMaterial("sphereMaterial", scene);
-      sphere.material.alpha = 1;
-      sphere.actionManager = new BABYLON.ActionManager(scene);
-      sphere?.actionManager?.registerAction(
-        new BABYLON.ExecuteCodeAction(
-          BABYLON.ActionManager.OnLeftPickTrigger,
-          function (event) {
-            const pickResult = scene.pick(event.pointerX, event.pointerY);
-            particleSystem.emitter = pickResult.pickedPoint;
-            plusScore();
-            particleSystem.start();
-            sphere.dispose();
-            setTimeout(() => {
-              particleSystem.stop();
-            }, 100);
-          }
-        )
-      );
-      sphere.animations.push(fadeOutAnimation);
-      sphere.animations.push(animation);
-      scene.beginAnimation(sphere, 0, 200, true);
-      scene.beginAnimation(sphere, 0, 100, false, 1, () => {
-        sphere.dispose();
-      });
-    }
 
     setInterval(() => {
-      createSphere();
+      createSphere(scene, particleSystem, fadeOutAnimation, animation);
     }, 500);
 
     engine.runRenderLoop(() => {
@@ -121,6 +88,40 @@ const GameScreen = () => {
       engine.resize();
     });
   }, []);
+
+  function createSphere(scene, particleSystem, fadeOutAnimation, animation) {
+    const sphere = BABYLON.MeshBuilder.CreateSphere(
+      "sphere",
+      { diameter: 2 },
+      scene
+    );
+
+    sphere.position = new BABYLON.Vector3(Math.random() * 20 - 5, -10, 5);
+    sphere.material = new BABYLON.StandardMaterial("sphereMaterial", scene);
+    sphere.material.alpha = 1;
+    sphere.actionManager = new BABYLON.ActionManager(scene);
+    sphere?.actionManager?.registerAction(
+      new BABYLON.ExecuteCodeAction(
+        BABYLON.ActionManager.OnLeftPickTrigger,
+        function (event) {
+          const pickResult = scene.pick(event.pointerX, event.pointerY);
+          particleSystem.emitter = pickResult.pickedPoint;
+          plusScore();
+          particleSystem.start();
+          sphere.dispose();
+          setTimeout(() => {
+            particleSystem.stop();
+          }, 100);
+        }
+      )
+    );
+    sphere.animations.push(fadeOutAnimation);
+    sphere.animations.push(animation);
+    scene.beginAnimation(sphere, 0, 200, true);
+    scene.beginAnimation(sphere, 0, 100, false, 1, () => {
+      sphere.dispose();
+    });
+  }
 
   const plusScore = () => {
     setScores(prev => {
